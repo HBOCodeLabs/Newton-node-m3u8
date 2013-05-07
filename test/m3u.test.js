@@ -99,7 +99,7 @@ describe('m3u', function() {
       }).length.should.eql(1);
     });
 
-    it('should use the largest targetDuration', function() {
+    it('should use the combined targetDuration', function() {
       var m3u1 = getM3u();
       m3u1.set('targetDuration', 10);
       m3u1.addPlaylistItem({});
@@ -108,7 +108,7 @@ describe('m3u', function() {
       m3u2.set('targetDuration', 11);
       m3u2.addPlaylistItem({});
       m3u1.merge(m3u2);
-      m3u1.get('targetDuration').should.eql(11);
+      m3u1.get('targetDuration').should.eql(21);
     });
   });
 

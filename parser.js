@@ -55,9 +55,14 @@ m3uParser.prototype.parse = function parse(line) {
 };
 
 m3uParser.prototype.parseLine = function parseLine(line) {
-  var parts = line.slice(1).split(':');
-  var tag   = parts[0];
-  var data  = parts[1];
+  var firstIndex = line.indexOf(':');
+  var tag, data;
+  if (firstIndex > -1){
+    tag = line.slice(1, firstIndex);
+    data = line.slice(firstIndex + 1);
+  } else {
+    tag = line.slice(1)
+  }
   if (typeof this[tag] == 'function') {
     this[tag](data, tag);
   } else {

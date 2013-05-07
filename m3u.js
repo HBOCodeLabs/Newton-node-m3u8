@@ -60,9 +60,17 @@ M3U.prototype.totalDuration = function totalDuration() {
 };
 
 M3U.prototype.merge = function merge(m3u) {
-  if (m3u.get('targetDuration') > this.get('targetDuration')) {
-    this.set('targetDuration', m3u.get('targetDuration'));
+  var newVersion = m3u.get('version') || 1;
+  var oldVersion = this.get('version') || 1;
+  if (newVersion > oldVersion) {
+    this.set('version', newVersion);
   }
+
+  if (m3u.get('EXT-X-KEY')) {
+    this.set('EXT-X-KEY', m3u.get('EXT-X-KEY'));
+  }
+
+  this.set('targetDuration', m3u.get('targetDuration') + this.get('targetDuration'));
   m3u.items.PlaylistItem[0].set('discontinuity', true);
   this.items.PlaylistItem = this.items.PlaylistItem.concat(m3u.items.PlaylistItem);
 
@@ -76,7 +84,7 @@ M3U.prototype.toString = function toString() {
     var tagKey = propertyMap.findByKey(key);
     var tag = tagKey ? tagKey.tag : key;
 
-    if (dataTypes[key] == 'boolean') {
+    if (dataTypes[key] == 'boolean' || typeof(self.get(key)) === 'undefined') {
       output.push('#' + tag);
     } else {
       output.push('#' + tag + ':' + self.get(key));
@@ -85,10 +93,6 @@ M3U.prototype.toString = function toString() {
 
   if (this.items.PlaylistItem.length) {
     output.push(this.items.PlaylistItem.map(itemToString).join('\n'));
-
-    if (this.get('playlistType') === 'VOD') {
-      output.push('#EXT-X-ENDLIST');
-    }
   } else {
     if (this.items.StreamItem.length) {
       output.push(this.items.StreamItem.map(itemToString).join('\n') + '\n');
@@ -99,6 +103,10 @@ M3U.prototype.toString = function toString() {
     if (this.items.MediaItem.length) {
       output.push(this.items.MediaItem.map(itemToString).join('\n') + '\n');
     }
+  }
+
+  if (this.get('playlistType') === 'VOD') {
+    output.push('#EXT-X-ENDLIST');
   }
 
   return output.join('\n') + '\n';
